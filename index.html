@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mi Vínculo Espiritual</title>
+  <style>
+    :root{
+      --bg-start:#0f172a; /* slate-900 */
+      --bg-end:#111827;   /* gray-900 */
+      --primary:#c4b5fd;  /* lighter violet */
+      --primary-2:#a78bfa;/* lighter indigo/violet */
+      --accent:#67e8f9;   /* cyan-300 */
+      --chip:#1f2937;     /* gray-800 */
+      --chip-text:#f8fafc;/* gray-50 */
+      --good:#34d399;     /* emerald-400 */
+      --warn:#fbbf24;     /* amber-300 */
+      --danger:#f87171;   /* red-400 */
+      --bg-image: url('L_lBOZC7.jpeg');
+      }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      color:#f3f4f6; background: radial-gradient(1200px 800px at 20% -10%, #1f2937 0%, transparent 60%),
+                      radial-gradient(1000px 800px at 120% 10%, #111827 0%, transparent 60%),
+                      linear-gradient(160deg,var(--bg-start),var(--bg-end));
+      overflow:hidden;
+    }
+    header{
+      position:fixed; inset:0 0 auto 0; z-index:40; padding:12px 16px; backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.35));
+      border-bottom:1px solid rgba(17,24,39,.12);
+      color:#0b1220;
+      display:flex; align-items:center; gap:12px;
+    }
+    .title{font-weight:700; letter-spacing:.3px;}
+    .sub{opacity:.7; font-size:.9rem}
+    .spacer{flex:1}
+    .btn{appearance:none; border:1px solid rgba(148,163,184,.3); background:#0b1220; color:#e5e7eb;
+      padding:10px 14px; border-radius:12px; cursor:pointer; transition:transform .06s ease, box-shadow .15s ease, background .2s;
+      box-shadow: 0 0 0 0 rgba(99,102,241,.5);
+    }
+    .btn:hover{background:#0f172a}
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{border-color:transparent; background:linear-gradient(90deg,var(--primary-2),#06b6d4); color:white;}
+    .btn-ghost{background:transparent}
+    .toggle{display:flex; align-items:center; gap:8px; font-size:.9rem}
+    .toggle input{accent-color:var(--primary-2); width:22px; height:22px}
+
+    main{position:absolute; inset:64px 0 120px 0;}
+
+    /* Nube de frases */
+    #cloud{position:absolute; inset:0; overflow:hidden}
+
+    .chip{
+      position:absolute; display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px;
+      background: rgba(255,255,255,.92); border:1px solid rgba(17,24,39,.1);
+      color:#0b1220; user-select:none; cursor:pointer; white-space:nowrap; 
+      box-shadow: 0 8px 30px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.75);
+      transition: transform .2s ease, background .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .chip:hover{transform: translateY(-2px) scale(1.03)}
+    .chip.selected{
+      background: linear-gradient(90deg, rgba(167,139,250,.25), rgba(103,232,249,.25)), rgba(255,255,255,.96);
+      border-color: rgba(99,102,241,.35);
+      box-shadow: 0 12px 36px rgba(99,102,241,.25);
+      color:#0b1220;
+    }
+    .badge{font-size:.72rem; padding:2px 8px; border-radius:999px; background: rgba(241,245,249,.9); border:1px solid rgba(17,24,39,.1); color:#0b1220}
+
+    /* Animación flotante */
+    @keyframes float {
+      0%   { transform: translate(var(--dx-start), var(--dy-start)) rotate(0deg);} 
+      50%  { transform: translate(var(--dx-mid), var(--dy-mid)) rotate(var(--rot));}
+      100% { transform: translate(var(--dx-end), var(--dy-end)) rotate(0deg);} 
+    }
+
+    /* Panel inferior de selección */
+    footer{
+      position:fixed; inset:auto 0 0 0; z-index:50; background: linear-gradient(0deg, rgba(0,0,0,.55), rgba(0,0,0,.35));
+      border-top:1px solid rgba(255,255,255,.18); padding:12px 16px; backdrop-filter: blur(8px);
+    }
+    .pick-row{display:flex; align-items:center; gap:8px; overflow:auto hidden; padding-bottom:6px}
+    .pick{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#0b1220;
+      border:1px solid rgba(148,163,184,.25); font-size:.92rem
+    }
+    .pick .remove{background:transparent; border:none; color:#e5e7eb; cursor:pointer; font-size:1rem}
+    .muted{opacity:.7}
+    .tools{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+
+    /* Modal resumen */
+    .modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(2,6,23,.66); z-index:60}
+    .modal.open{display:grid}
+    .card{background:#0b1220; border:1px solid rgba(148,163,184,.25); border-radius:16px; padding:20px; max-width:720px; width:94%; box-shadow:0 24px 80px rgba(0,0,0,.45)}
+    .card h3{margin:.2rem 0 0.5rem 0}
+    textarea{width:100%; min-height:120px; background:#0a0f1e; color:#e5e7eb; border:1px solid rgba(148,163,184,.25); border-radius:12px; padding:10px}
+    .small{font-size:.9rem; opacity:.75}
+
+    /* Panel de edición/ayuda */
+    details{margin-left:8px}
+    details>summary{cursor:pointer; opacity:.8}
+
+    @media (max-width:640px){
+      header{padding:10px}
+      .title{font-size:1rem}
+      .sub{display:none}
+      .btn{padding:8px 10px}
+    }
+    /* Fuerzo el gradiente en <html> y dejo <body> transparente */
+    html{
+      background:#71b2eb;
+      background: radial-gradient(circle, rgba(113,178,235,1) 14%, rgba(250,245,245,1) 46%, rgba(21,165,237,1) 63%, rgba(255,250,250,1) 77%, rgba(59,127,217,1) 92%);
+      background-attachment: fixed;
+    }
+    body{ background: transparent !important; }
+    main, #cloud { background: transparent; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="title">Mi Vínculo Espiritual</div>
+      <div class="sub">Elegí frases que describan tu vínculo con Dios; tócalas para seleccionarlas.</div>
+    </div>
+    <div class="spacer"></div>
+    <label class="toggle" title="Modo facilitador: solo visualización">
+      <input id="modeToggle" type="checkbox" /> Modo facilitador
+    </label>
+    <button class="btn btn-ghost" id="btnEdit">Frases</button>
+    <button class="btn" id="btnReset">Reiniciar</button>
+    <button class="btn btn-primary" id="btnFinish">Terminar</button>
+  </header>
+
+  <main>
+    <div id="cloud" aria-live="polite" aria-label="Nube de frases seleccionables"></div>
+  </main>
+
+  <footer>
+    <div class="pick-row" id="picks"></div>
+    <div class="tools">
+      <span class="muted small" id="hint">Tip: podés arrastrar lateralmente si hay muchas selecciones.</span>
+      <div class="spacer"></div>
+      <button class="btn" id="btnCopy">Copiar resumen</button>
+      <button class="btn" id="btnShare">Compartir</button>
+    </div>
+  </footer>
+
+  <!-- Modal de resumen -->
+  <div class="modal" id="modal">
+    <div class="card">
+      <h3>Tu manifiesto de vínculo</h3>
+      <p class="small">Podés editar el texto antes de copiar o compartir.</p>
+      <textarea id="manifesto"></textarea>
+      <div class="tools" style="margin-top:12px">
+        <button class="btn btn-primary" id="btnCopy2">Copiar</button>
+        <button class="btn" id="btnClose">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de edición de frases -->
+  <div class="modal" id="modalEdit">
+    <div class="card">
+      <h3>Editar / Agregar frases</h3>
+      <p class="small">Una por línea. Se recomienda comenzar con «Mi vínculo …» (ej.: «Mi vínculo es humildad»).</p>
+      <textarea id="editArea" spellcheck="false"></textarea>
+      <details>
+        <summary>Sugerencias de uso</summary>
+        <ul class="small">
+          <li>Si escribís «Mi vínculo es …», «Mi vínculo tiene …», «Mi vínculo se nutre de …», «Mi vínculo se expresa en …» o «Mi vínculo camina hacia …», el resumen quedará más fluido.</li>
+          <li>Podés pegar tu propia lista antes de la actividad (se guardará localmente en este dispositivo).</li>
+          <li>Modo facilitador desactiva las selecciones (ideal para pantalla grande).</li>
+        </ul>
+      </details>
+      <div class="tools" style="margin-top:12px">
+        <button class="btn btn-primary" id="btnApply">Aplicar cambios</button>
+        <button class="btn" id="btnCancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*********************
+ * Configuración base *
+ *********************/
+const DEFAULT_SEED = {
+  es: [
+    "humildad","alegría","confianza","gratitud","misericordia","valentía",
+    "paciencia","mansedumbre","fidelidad","pureza","esperanza","sencillez"
+  ],
+  tiene: [
+    "adoración musical","silencio interior","estudio del evangelio","servicio a los demás",
+    "fraternidad","mentoría","compasión activa","hospitalidad","caridad discreta","humor sano","creatividad"
+  ],
+  seNutre: [
+    "oración diaria","contemplación","naturaleza","trabajo bien hecho","disciplina",
+    "perdón","reconciliación","ayuno responsable"
+  ],
+  seExpresa: [
+    "justicia","paz","unidad","escuchar antes de hablar","cuidar a enfermos",
+    "enseñar a niños","visitar a ancianos","honestidad laboral","cuidar el cuerpo","cuidar la mente"
+  ],
+  camina: [
+    "la voluntad del Padre","el Reino interior","la verdad viviente","la belleza y la bondad","el progreso del alma"
+  ]
+};
+
+function buildDefaultPhrases(){
+  const arr = [];
+  DEFAULT_SEED.es.forEach(t => arr.push(`Mi vínculo es ${t}`));
+  DEFAULT_SEED.tiene.forEach(t => arr.push(`Mi vínculo tiene ${t}`));
+  DEFAULT_SEED.seNutre.forEach(t => arr.push(`Mi vínculo se nutre de ${t}`));
+  DEFAULT_SEED.seExpresa.forEach(t => arr.push(`Mi vínculo se expresa en ${t}`));
+  DEFAULT_SEED.camina.forEach(t => arr.push(`Mi vínculo camina hacia ${t}`));
+  return arr;
+}
+
+const STORAGE_KEY = "vinculo_frases_v1";
+const STORAGE_SEL  = "vinculo_seleccion_v1";
+
+/****************
+ * Estado       *
+ ****************/
+let phrases = loadPhrases();
+let selected = new Set(JSON.parse(localStorage.getItem(STORAGE_SEL) || "[]"));
+let facilitator = false;
+
+/****************
+ * DOM helpers  *
+ ****************/
+const cloud = document.getElementById('cloud');
+const picks = document.getElementById('picks');
+const modeToggle = document.getElementById('modeToggle');
+const modal = document.getElementById('modal');
+const manifesto = document.getElementById('manifesto');
+const modalEdit = document.getElementById('modalEdit');
+const editArea = document.getElementById('editArea');
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function rand(min,max){ return Math.random()*(max-min)+min; }
+
+/****************
+ * Render nube  *
+ ****************/
+function renderCloud(){
+  cloud.innerHTML = '';
+  const {width, height} = cloud.getBoundingClientRect();
+  const margin = 24; // para no pegarse a los bordes
+
+  phrases.forEach((text, idx) => {
+    const el = document.createElement('div');
+    el.className = 'chip';
+    el.tabIndex = 0;
+    el.role = 'button';
+    el.ariaLabel = text;
+
+    const cat = categorize(text);
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = cat.label;
+
+    const t = document.createElement('span');
+    t.textContent = text;
+
+    el.appendChild(badge);
+    el.appendChild(t);
+
+    // posición y animación aleatoria
+    const x = rand(margin, Math.max(margin, width-220));
+    const y = rand(margin, Math.max(margin, height-60));
+    el.style.left = `${x}px`;
+    el.style.top  = `${y}px`;
+
+    el.style.setProperty('--dx-start', `${rand(-6,6)}px`);
+    el.style.setProperty('--dy-start', `${rand(-6,6)}px`);
+    el.style.setProperty('--dx-mid', `${rand(-30,30)}px`);
+    el.style.setProperty('--dy-mid', `${rand(-24,24)}px`);
+    el.style.setProperty('--dx-end', `${rand(-6,6)}px`);
+    el.style.setProperty('--dy-end', `${rand(-6,6)}px`);
+    el.style.setProperty('--rot', `${rand(-3,3)}deg`);
+    el.style.animation = `float ${rand(9,16).toFixed(2)}s ease-in-out ${rand(-6,6).toFixed(2)}s infinite`;
+
+    if(selected.has(text)) el.classList.add('selected');
+
+    el.addEventListener('click', () => toggleSelect(text, el));
+    el.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); toggleSelect(text, el); }});
+
+    cloud.appendChild(el);
+  });
+}
+
+function toggleSelect(text, el){
+  if(facilitator) return; // bloqueado en modo facilitador
+  if(selected.has(text)) selected.delete(text); else selected.add(text);
+  localStorage.setItem(STORAGE_SEL, JSON.stringify([...selected]));
+  el && el.classList.toggle('selected');
+  renderPicks();
+}
+
+/****************
+ * Selecciones  *
+ ****************/
+function renderPicks(){
+  picks.innerHTML = '';
+  if(selected.size===0){
+    const hint = document.createElement('span');
+    hint.className = 'muted';
+    hint.textContent = 'Aún no elegiste frases';
+    picks.appendChild(hint);
+    return;
+  }
+  [...selected].forEach(text => {
+    const el = document.createElement('span');
+    el.className = 'pick';
+    el.innerHTML = `<span>${text}</span>`;
+    const b = document.createElement('button');
+    b.className = 'remove';
+    b.title = 'Quitar';
+    b.innerHTML = '×';
+    b.onclick = ()=>{ selected.delete(text); localStorage.setItem(STORAGE_SEL, JSON.stringify([...selected])); renderPicks(); markCloud(text,false); };
+    el.appendChild(b);
+    picks.appendChild(el);
+  })
+}
+
+function markCloud(text, isSelected){
+  const nodes = [...cloud.querySelectorAll('.chip')];
+  const node = nodes.find(n=> n.textContent.includes(text));
+  if(node){ node.classList.toggle('selected', isSelected ?? selected.has(text)); }
+}
+
+/****************
+ * Modal resumen *
+ ****************/
+function buildManifestoText(){
+  const list = [...selected];
+  if(list.length===0) return "Aún no seleccioné frases para mi vínculo.";
+
+  // Agrupar por comienzo
+  const groups = {
+    es: [], tiene: [], seNutre: [], seExpresa: [], camina: [], otros: []
+  };
+  list.forEach(txt=>{
+    const cat = categorize(txt).key;
+    if(groups[cat]) groups[cat].push(stripPrefix(txt)); else groups.otros.push(txt);
+  });
+
+  function joinNice(arr){
+    if(arr.length===0) return '';
+    if(arr.length===1) return arr[0];
+    return arr.slice(0,-1).join(', ') + ' y ' + arr.slice(-1);
+  }
+
+  const parts = [];
+  if(groups.es.length)      parts.push(`Mi vínculo es ${joinNice(groups.es)}`);
+  if(groups.tiene.length)   parts.push(`Mi vínculo tiene ${joinNice(groups.tiene)}`);
+  if(groups.seNutre.length) parts.push(`Mi vínculo se nutre de ${joinNice(groups.seNutre)}`);
+  if(groups.seExpresa.length) parts.push(`Mi vínculo se expresa en ${joinNice(groups.seExpresa)}`);
+  if(groups.camina.length)  parts.push(`Mi vínculo camina hacia ${joinNice(groups.camina)}`);
+  if(groups.otros.length)   parts.push(joinNice(groups.otros));
+
+  return parts.join('. ') + '.';
+}
+
+function stripPrefix(t){
+  return t.replace(/^Mi vínculo (es|tiene|se nutre de|se expresa en|camina hacia)\s*/i,'');
+}
+
+function categorize(t){
+  const L = t.toLowerCase();
+  if(L.startsWith('mi vínculo es ')) return {key:'es', label:'ES'};
+  if(L.startsWith('mi vínculo tiene ')) return {key:'tiene', label:'TIENE'};
+  if(L.startsWith('mi vínculo se nutre de ')) return {key:'seNutre', label:'SE NUTRE'};
+  if(L.startsWith('mi vínculo se expresa en ')) return {key:'seExpresa', label:'SE EXPRESA'};
+  if(L.startsWith('mi vínculo camina hacia ')) return {key:'camina', label:'CAMINA'};
+  return {key:'otros', label:'VÍNCULO'};
+}
+
+/****************
+ * Persistencia *
+ ****************/
+function loadPhrases(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(saved){
+    try{ const list = JSON.parse(saved); if(Array.isArray(list) && list.length>0) return list; }catch{}
+  }
+  return buildDefaultPhrases();
+}
+function savePhrases(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(phrases)); }
+
+/****************
+ * Eventos UI   *
+ ****************/
+window.addEventListener('resize', debounce(()=>renderCloud(), 150));
+
+// Modo facilitador
+modeToggle.addEventListener('change', (e)=>{ facilitator = !!e.target.checked; document.body.classList.toggle('facilitator', facilitator);});
+
+// Terminar -> abre modal
+const btnFinish = document.getElementById('btnFinish');
+btnFinish.addEventListener('click', ()=>{ manifesto.value = buildManifestoText(); modal.classList.add('open'); manifesto.focus(); manifesto.select(); });
+
+// Copiar y cerrar modal
+const btnCopy = document.getElementById('btnCopy');
+const btnCopy2 = document.getElementById('btnCopy2');
+const btnClose = document.getElementById('btnClose');
+btnCopy.addEventListener('click', ()=>{ navigator.clipboard.writeText(buildManifestoText()); flash(btnCopy, '¡Copiado!'); });
+btnCopy2.addEventListener('click', ()=>{ navigator.clipboard.writeText(manifesto.value); flash(btnCopy2, '¡Copiado!'); });
+btnClose.addEventListener('click', ()=> modal.classList.remove('open'));
+
+// Compartir nativo o fallback
+const btnShare = document.getElementById('btnShare');
+btnShare.addEventListener('click', async ()=>{
+  const text = buildManifestoText();
+  if(navigator.share){
+    try{ await navigator.share({title:'Mi vínculo espiritual', text, url:location.href}); }
+    catch{}
+  } else {
+    const wa = `https://wa.me/?text=${encodeURIComponent('Mi vínculo espiritual: '+text)}`;
+    window.open(wa, '_blank');
+  }
+});
+
+// Reiniciar selecciones
+const btnReset = document.getElementById('btnReset');
+btnReset.addEventListener('click', ()=>{
+  if(confirm('¿Quitar todas tus selecciones?')){
+    selected = new Set(); localStorage.removeItem(STORAGE_SEL); renderPicks(); renderCloud();
+  }
+});
+
+// Editor de frases
+const btnEdit = document.getElementById('btnEdit');
+const btnApply = document.getElementById('btnApply');
+const btnCancel = document.getElementById('btnCancel');
+btnEdit.addEventListener('click', ()=>{
+  editArea.value = phrases.join('\n');
+  modalEdit.classList.add('open');
+  editArea.focus();
+});
+btnApply.addEventListener('click', ()=>{
+  const lines = editArea.value.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  if(lines.length===0){ alert('Agregá al menos una frase.'); return; }
+  phrases = [...new Set(lines)];
+  savePhrases();
+  selected = new Set(); localStorage.removeItem(STORAGE_SEL);
+  modalEdit.classList.remove('open');
+  renderCloud(); renderPicks();
+});
+btnCancel.addEventListener('click', ()=> modalEdit.classList.remove('open'));
+
+/****************
+ * Utilidades   *
+ ****************/
+function debounce(fn, ms){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); } }
+function flash(el, txt){
+  const prev = el.textContent; el.textContent = txt; const t = setTimeout(()=>{ el.textContent = prev; clearTimeout(t); }, 1200);
+}
+
+/****************
+ * Init         *
+ ****************/
+renderCloud();
+renderPicks();
+
+</script>
+</body>
+</html>
